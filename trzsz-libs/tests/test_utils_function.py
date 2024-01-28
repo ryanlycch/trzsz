@@ -20,4 +20,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-__version__ = '1.1.5'
+import unittest
+from .trzsz.libs import utils
+
+
+class TestUtilsFunction(unittest.TestCase):
+
+    def test_strip_tmux_status_line(self):
+        P = '\x1bP=1s\x1b\\\x1b[?25l\x1b[?12l\x1b[?25h\x1b[5 q\x1bP=2s\x1b\\'  # pylint: disable=invalid-name
+        self.assertEqual('', utils.strip_tmux_status_line(''))
+        self.assertEqual('ABC123', utils.strip_tmux_status_line('ABC' + '123'))
+        self.assertEqual('ABC123', utils.strip_tmux_status_line('ABC' + P + '123'))
+        self.assertEqual('ABC123XYZ', utils.strip_tmux_status_line('ABC' + P + '123' + P + 'XYZ'))
+        self.assertEqual('ABC123XYZ', utils.strip_tmux_status_line('ABC' + P + '123' + P * 3 + 'XYZ'))
+        for i in range(len(P) - 2):
+            self.assertEqual('ABC123', utils.strip_tmux_status_line('ABC' + P + '123' + P[:len(P) - i]))
+
+
+if __name__ == '__main__':
+    unittest.main()
